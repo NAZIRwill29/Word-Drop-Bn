@@ -10,6 +10,7 @@ public class Data
     public string dateNow;
     public string firstSavedDate;
     public string savedDate;
+    public int datePlay;
     public float playTime;
     public int passStageNo;
     public List<int> challengePassNo;
@@ -26,7 +27,7 @@ public class Data
     //dont save at cloud----------------
     public bool isBookAdsUsed;
     public int bookAdsUsedNo;
-    public bool isHasRateReview;
+    public bool isHasRateReview, isHasFbShare, isHasTwShare, isHasWsShare;
     public bool isHasShowRateReview;
     public float[] listChScoreTime = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     public int[] listChScoreBuild = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };

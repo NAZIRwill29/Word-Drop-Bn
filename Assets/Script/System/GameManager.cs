@@ -279,6 +279,9 @@ public class GameManager : MonoBehaviour
         // isHasShowRateReview = true;
         if (firstSavedDate != gameData.dateNow)
         {
+            //check every 3 day
+            if (gameData.datePlay % 3 != 0)
+                return;
             if (isHasShowRateReview)
                 return;
             mainMenuUI.ShowRateReviewWindow(1);
@@ -550,6 +553,7 @@ public class GameManager : MonoBehaviour
         gameData.musicVolume = 1;
         gameData.dateNow = "";
         gameData.savedDate = "";
+        gameData.datePlay = 0;
         gameData.passStageNo = 0;
         gameData.challengePassNo.Clear();
         gameData.bookNumCollect = 0;
@@ -563,6 +567,9 @@ public class GameManager : MonoBehaviour
         gameData.charBought = 0;
         gameData.bookAdsUsedNo = 0;
         gameData.isBookAdsUsed = false;
+        gameData.isHasFbShare = false;
+        gameData.isHasTwShare = false;
+        gameData.isHasWsShare = false;
         for (int i = 0; i < gameData.listChScoreTime.Length; i++)
         {
             gameData.listChScoreTime[i] = 0;
@@ -621,6 +628,7 @@ public class GameManager : MonoBehaviour
             //save once a day
             if (System.DateTime.Now.ToString("MM/dd/yyyy") != gameData.savedDate || gameData.savedDate == "")
             {
+                gameData.datePlay++;
                 gameData.savedDate = gameData.dateNow;
                 cloudSave.SaveComplexDataCloud(gameData);
             }
@@ -925,6 +933,7 @@ public class GameManager : MonoBehaviour
             // gameData = data;
             gameData.firstSavedDate = data.firstSavedDate;
             gameData.savedDate = data.savedDate;
+            gameData.datePlay = data.datePlay;
             gameData.bookNumCollect = data.bookNumCollect;
             gameData.coin = data.coin;
             gameData.isPremiumPlan = data.isPremiumPlan;
@@ -951,6 +960,9 @@ public class GameManager : MonoBehaviour
 
             gameData.listChScoreTime = data.listChScoreTime;
             gameData.listChScoreBuild = data.listChScoreBuild;
+            gameData.isHasFbShare = data.isHasFbShare;
+            gameData.isHasTwShare = data.isHasTwShare;
+            gameData.isHasWsShare = data.isHasWsShare;
             //TODO - set data for all in game
             if (!isWantSave)
                 SceneManager.sceneLoaded += LoadState;

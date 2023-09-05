@@ -9,7 +9,7 @@ public class CloudSave : MonoBehaviour
 {
     // public TextMeshProUGUI debugTxt, debugTxt2;
     // public TMP_InputField inputScore, inputKeyName;  
-    private string dataCloudName = "allD";
+    private string dataCloudName = "allE";
     //save complex data
     public async void SaveComplexDataCloud(Data dataToBeSave)
     {

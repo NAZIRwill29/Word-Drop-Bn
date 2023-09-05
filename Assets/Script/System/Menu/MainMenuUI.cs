@@ -18,7 +18,7 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField]
     private Animator mainMenuAnim, backgroundAnim, playerInfoWindowAnim, settingWindowAnim, playerInfoBtnAnim, playerLvlBtnAnim;
     public Animator loadingScreenAnim, tipModules, levelWindowAnim, tipAnim, tipScreenAnim, challengeWindowAnim, updateStatusAnim;
-    [SerializeField] private Animator rateReviewWindowAnim;
+    [SerializeField] private Animator rateReviewWindowAnim, taskWindowAnim;
     //player info window
     public Image playerImg;
     public TextMeshProUGUI lvlText, hpText, abcText, shieldText, strengthText, addWordPtText, coinText, bookText;
@@ -32,6 +32,8 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField] private Image[] challengeCompleteImg;
     [SerializeField] private TextMeshProUGUI[] challengeCompleteText, challengeImcompleteText, chTimeText, chBuildTime;
     [SerializeField] private GameObject challengeWindowBtnObj;
+    [SerializeField] private Button[] taskBtn;
+    [SerializeField] private GameObject[] taskCompleteObj;
     //private bool isLoadingScreenAnimate;
     // Start is called before the first frame update
     void Start()
@@ -345,53 +347,6 @@ public class MainMenuUI : MonoBehaviour
         GameManager.instance.RequestDeleteUserAccDb();
     }
 
-    //animation-------------------------------------------
-    public IEnumerator ShowAnim()
-    {
-        yield return new WaitForSeconds(0);
-        MainMenuAnim(1);
-        BackgroundAnim(1);
-        Debug.Log("main menu show");
-        GameManager.instance.OnMainMenu();
-    }
-    public IEnumerator HideAnim()
-    {
-        yield return new WaitForSeconds(0);
-        //mainMenuAnim.SetTrigger("hide");
-        BackgroundAnim(0);
-        Debug.Log("main menu hide");
-    }
-    public void MainMenuAnim(int num)
-    {
-        mainMenuAnim.SetInteger("state", num);
-        //show challenge button if more than 2 stage
-        if (GameManager.instance.passStageNo > 2)
-            challengeWindowBtnObj.SetActive(true);
-        else
-            challengeWindowBtnObj.SetActive(false);
-    }
-    public void BackgroundAnim(int num)
-    {
-        backgroundAnim.SetInteger("state", num);
-    }
-    public void PlayerInfoWindowAnim(int num)
-    {
-        playerInfoWindowAnim.SetInteger("state", num);
-    }
-    public void SettingWindowAnim(int num)
-    {
-        settingWindowAnim.SetInteger("state", num);
-    }
-    public void LevelWindowAnim(int num)
-    {
-        levelWindowAnim.SetInteger("state", num);
-    }
-    public void ChallengeWindowAnim(int num)
-    {
-        challengeWindowAnim.SetInteger("state", num);
-    }
-    //---------------------------------------------------
-
     //rate review window --------------------------------
     public void ShowRateReviewWindow(int num)
     {
@@ -400,20 +355,82 @@ public class MainMenuUI : MonoBehaviour
             GameManager.instance.SaveState(true, false);
     }
     //rate review btn
-    //USED () - in rate btn
+    //USED () - in rate btn - in rate review window
     public void RateBtn()
     {
         GameManager.instance.connectBrowser.OpenUrl("https://play.google.com/store/apps/details?id=com.MohdNazir.WordGather&pcampaignid=web_share");
         GameManager.instance.isHasRateReview = true;
         ShowRateReviewWindow(0);
-        GameManager.instance.player.ReceiveBook(10);
+        RewardBookFromTask(5);
+    }
+    //--------------------------------------------------
+    //task window --------------------------------------
+    public void ShowTaskWindow(int num)
+    {
+        taskWindowAnim.SetInteger("state", num);
+        if (num == 0)
+            GameManager.instance.SaveState(true, false);
+        TaskBtnStatus(0, GameManager.instance.isHasRateReview);
+        TaskBtnStatus(1, GameManager.instance.gameData.isHasFbShare);
+        TaskBtnStatus(2, GameManager.instance.gameData.isHasTwShare);
+        TaskBtnStatus(3, GameManager.instance.gameData.isHasWsShare);
+    }
+    //USED () - in play store btn - in task window
+    public void TaskRateBtn()
+    {
+        GameManager.instance.connectBrowser.OpenUrl("https://play.google.com/store/apps/details?id=com.MohdNazir.WordGather&pcampaignid=web_share");
+        GameManager.instance.isHasRateReview = true;
+        RewardBookFromTask(5);
+        TaskBtnStatus(0, true);
+    }
+    //USED () - in fb share btn
+    public void ShareFacebookBtn()
+    {
+        GameManager.instance.connectBrowser.OpenUrl("https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.MohdNazir.WordGather%26pcampaignid%3Dweb_share");
+        GameManager.instance.gameData.isHasFbShare = true;
+        RewardBookFromTask(3);
+        TaskBtnStatus(1, true);
+    }
+    //USED () - in tw share btn
+    public void ShareTwitterBtn()
+    {
+        GameManager.instance.connectBrowser.OpenUrl("https://twitter.com/intent/tweet?url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.MohdNazir.WordGather%26pcampaignid%3Dweb_share&via=GooglePlay&text=Have%20a%20look%20at%20%27Word%20Gather%20-%20Word%20Escape%20Run%27");
+        GameManager.instance.gameData.isHasTwShare = true;
+        RewardBookFromTask(3);
+        TaskBtnStatus(2, true);
+    }
+    //USED () - in ws share btn
+    public void ShareWhatsappBtn()
+    {
+        GameManager.instance.connectBrowser.OpenUrl("https://api.whatsapp.com/send/?text=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.MohdNazir.WordGather%26pcampaignid%3Dweb_share&type=custom_url");
+        GameManager.instance.gameData.isHasWsShare = true;
+        RewardBookFromTask(3);
+        TaskBtnStatus(3, true);
+    }
+    private void RewardBookFromTask(int numBook)
+    {
+        GameManager.instance.player.ReceiveBook(numBook);
         GameManager.instance.SaveState(true, false);
-        StartCoroutine(DelayGetBookPopUp(10));
+        StartCoroutine(DelayGetBookPopUp(numBook));
     }
     private IEnumerator DelayGetBookPopUp(int numBook)
     {
         yield return new WaitForSeconds(0.5f);
         GameManager.instance.popUpUi.GetItemPopUp(true, false, numBook, 0);
+    }
+    //decide to make task btn interactable based on task completion
+    private void TaskBtnStatus(int numTaskBtn, bool isComplete)
+    {
+        if (isComplete)
+        {
+            taskBtn[numTaskBtn].enabled = false;
+            taskCompleteObj[numTaskBtn].SetActive(true);
+        }
+        else
+        {
+            taskBtn[numTaskBtn].enabled = true;
+            taskCompleteObj[numTaskBtn].SetActive(false);
+        }
     }
     //--------------------------------------------------
 
@@ -512,6 +529,57 @@ public class MainMenuUI : MonoBehaviour
     {
         GameManager.instance.connectBrowser.OpenUrl(urlName);
     }
+
+    //animation-------------------------------------------
+    public IEnumerator ShowAnim()
+    {
+        yield return new WaitForSeconds(0);
+        MainMenuAnim(1);
+        BackgroundAnim(1);
+        Debug.Log("main menu show");
+        GameManager.instance.OnMainMenu();
+    }
+    public IEnumerator HideAnim()
+    {
+        yield return new WaitForSeconds(0);
+        //mainMenuAnim.SetTrigger("hide");
+        BackgroundAnim(0);
+        Debug.Log("main menu hide");
+    }
+    public void MainMenuAnim(int num)
+    {
+        mainMenuAnim.SetInteger("state", num);
+        //show challenge button if more than 2 stage
+        if (GameManager.instance.passStageNo > 2)
+            challengeWindowBtnObj.SetActive(true);
+        else
+            challengeWindowBtnObj.SetActive(false);
+    }
+    public void BackgroundAnim(int num)
+    {
+        backgroundAnim.SetInteger("state", num);
+    }
+    public void PlayerInfoWindowAnim(int num)
+    {
+        playerInfoWindowAnim.SetInteger("state", num);
+    }
+    public void SettingWindowAnim(int num)
+    {
+        settingWindowAnim.SetInteger("state", num);
+    }
+    public void LevelWindowAnim(int num)
+    {
+        levelWindowAnim.SetInteger("state", num);
+    }
+    public void ChallengeWindowAnim(int num)
+    {
+        challengeWindowAnim.SetInteger("state", num);
+    }
+    public void TaskWindowAnim(int num)
+    {
+        taskWindowAnim.SetInteger("state", num);
+    }
+    //---------------------------------------------------
 
     //play sound -------------------------------------------
     public void PlaySoundPlay()
