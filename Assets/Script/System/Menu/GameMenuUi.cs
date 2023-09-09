@@ -9,8 +9,8 @@ public class GameMenuUi : MonoBehaviour
 {
     [SerializeField] GameSettings gameSettings;
     //sound
-    //  0          1        2
-    //word      build    complete
+    //  0          1        2           3
+    //word      build    complete     fail
     [SerializeField] private AudioClip[] gameMenuUiAudioClip;
     public AudioSource gameMenuUiAudioSource;
     //[SerializeField] private Player player;
@@ -32,7 +32,7 @@ public class GameMenuUi : MonoBehaviour
     public Image hpImg;
     //public RectTransform hpImgRT;
     public GameObject hpNotice;
-    public Animator hpNoticeAnim;
+    public Animator hpNoticeAnim, wordContainerAnim, wordTutorialContainerAnim;
     public Sprite[] hpSprite;
     public PlayerData playerData;
     public Animator gameMenuUiAnim;
@@ -151,6 +151,7 @@ public class GameMenuUi : MonoBehaviour
         SetBuildCooldown();
         SetBuildLimit();
         GameManager.instance.player.SetShieldNum();
+        WordConAnimStatus(0);
         if (objBuildCooldownNum >= objBuildCooldownDuration)
         {
             SetRunBuildBtn(true);
@@ -500,6 +501,7 @@ public class GameMenuUi : MonoBehaviour
                 return;
         ResetAlphabetWordBtnClick();
         GameManager.instance.inGame.ResetLastTimeSpawn();
+        WordConAnimStatus(0);
         if (!isRunGame)
             gameMenuUiAnim.SetTrigger("info");
         else
@@ -633,6 +635,8 @@ public class GameMenuUi : MonoBehaviour
         //reward combine letter to word
         if (CheckWordExist(letterCombine))
         {
+            //show success status word container
+            WordConAnimStatus(1);
             //add word pt
             int wordToWordPt = letterCombine.Length + playerData.addWordPt;
             //Challenge MODE () - FIRST END
@@ -691,15 +695,18 @@ public class GameMenuUi : MonoBehaviour
         }
         else
         {
+            //show fail status word container
+            WordConAnimStatus(2);
+            PlaySoundFail();
             //player.PlaySoundFailed();
             ResetAlphabetWordBtnClick();
             //TUTORIAL MODE () - use for fail to combine - made tutorial 5F
-            if (!GameManager.instance.isTutorialMode)
-                return;
-            if (GameManager.instance.tutorial.TutorialPhaseNo == 6)
-            {
-                //GameManager.instance.tutorialUI.TutorialEvent(6);
-            }
+            // if (!GameManager.instance.isTutorialMode)
+            //     return;
+            // if (GameManager.instance.tutorial.TutorialPhaseNo == 6)
+            // {
+            //     //GameManager.instance.tutorialUI.TutorialEvent(6);
+            // }
         }
     }
 
@@ -842,6 +849,7 @@ public class GameMenuUi : MonoBehaviour
     //show first end noti
     private IEnumerator ShowFirstEndNoti()
     {
+        PlaySoundFail();
         firstEndNoti.SetActive(true);
         yield return new WaitForSeconds(1f);
         firstEndNoti.SetActive(false);
@@ -1233,6 +1241,26 @@ public class GameMenuUi : MonoBehaviour
         }
     }
 
+    //word container anim
+    private void WordConAnimStatus(int num)
+    {
+        //TUTORIAL MODE ()
+        if (GameManager.instance.isTutorialMode)
+        {
+            if (num == 1)
+                wordTutorialContainerAnim.SetTrigger("success");
+            else if (num == 2)
+                wordTutorialContainerAnim.SetTrigger("fail");
+        }
+        else
+        {
+            if (num == 1)
+                wordContainerAnim.SetTrigger("success");
+            else if (num == 2)
+                wordContainerAnim.SetTrigger("fail");
+        }
+    }
+
     //play sound -------------------------------------------
     public void PlaySoundWord()
     {
@@ -1249,6 +1277,10 @@ public class GameMenuUi : MonoBehaviour
     public void PlaySoundComplete()
     {
         gameMenuUiAudioSource.PlayOneShot(gameMenuUiAudioClip[2]);
+    }
+    public void PlaySoundFail()
+    {
+        gameMenuUiAudioSource.PlayOneShot(gameMenuUiAudioClip[3]);
     }
     //----------------------------------------------------
 

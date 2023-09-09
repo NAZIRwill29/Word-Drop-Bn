@@ -369,7 +369,10 @@ public class MainMenuUI : MonoBehaviour
     {
         taskWindowAnim.SetInteger("state", num);
         if (num == 0)
+        {
             GameManager.instance.SaveState(true, false);
+            PlayerInfoWindow();
+        }
         TaskBtnStatus(0, GameManager.instance.isHasRateReview);
         TaskBtnStatus(1, GameManager.instance.gameData.isHasFbShare);
         TaskBtnStatus(2, GameManager.instance.gameData.isHasTwShare);
